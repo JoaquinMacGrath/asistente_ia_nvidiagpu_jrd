@@ -6,21 +6,33 @@ se da cuenta solo porque Render define RENDER_EXTERNAL_URL.
 """
 
 import hashlib
+import asyncio
 import os
 
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
-from asistente import responder
+from asistente import responder, responder_con_conversacion
 from config import settings
 
 TOKEN = settings.telegram_token.get_secret_value()
+CONVERSACION_KEY = "pydantic_conversation"
+LOCKS_KEY = "conversation_locks"
+
+
+def bloqueo_del_chat(context: ContextTypes.DEFAULT_TYPE, chat_id: int) -> asyncio.Lock:
+    """Devuelve un lock por chat para serializar sus turnos del agente."""
+    locks = context.application.bot_data.setdefault(LOCKS_KEY, {})
+    return locks.setdefault(chat_id, asyncio.Lock())
 
 
 async def inicio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """/start: lo primero que manda Telegram. Dice el número de chat para añadirlo a la lista."""
     chat = str(update.effective_chat.id)
     if chat in settings.permitidos:
+        if update.effective_chat.type == "private":
+            async with bloqueo_del_chat(context, update.effective_chat.id):
+                context.chat_data.pop(CONVERSACION_KEY, None)
         await update.message.reply_text("¡Hola! Ya puedes escribirme.")
     else:
         await update.message.reply_text(f"Tu número de chat es {chat}. Pídele al dueño del bot que lo añada.")
@@ -33,7 +45,17 @@ async def mensaje(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(f"No autorizado. Tu chat es {chat}: pídele al dueño que lo añada.")
         return
     try:
-        respuesta = await responder(update.message.text)
+        if update.effective_chat.type == "private":
+            async with bloqueo_del_chat(context, update.effective_chat.id):
+                respuesta, conversacion = await responder_con_conversacion(
+                    update.message.text,
+                    context.chat_data.get(CONVERSACION_KEY),
+                )
+                # Commit después del éxito: ante una excepción se conserva el historial anterior.
+                context.chat_data[CONVERSACION_KEY] = conversacion
+        else:
+            # chat_data se comparte dentro de grupos; no mezclar historiales de participantes.
+            respuesta = await responder(update.message.text)
     except Exception as error:  # cuota agotada (429), una API caída…: se avisa en vez de quedarse callado
         print("Error:", repr(error)[:300], flush=True)  # el detalle, en la terminal o en los Logs de Render
         respuesta = "Algo falló (el modelo o una herramienta). Intenta de nuevo en un minuto."

@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from asistente import responder
 from config import settings
 
-app = FastAPI(title="Mi asistente")
+app = FastAPI(title="NVIDIA GPU & AI Assistant")
 
 
 def autenticar(credenciales: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False))) -> None:

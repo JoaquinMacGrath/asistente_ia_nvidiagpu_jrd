@@ -20,7 +20,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 pydantic_ai.BANNER_ENABLED = False  # sin el aviso de Logfire en cada ejecución
 
 RAIZ = Path(__file__).resolve().parent  # la carpeta del proyecto
-DATOS = RAIZ / "datos"  # gastos.csv y documentos/*.pdf
+DATOS = RAIZ / "datos"  # documentos técnicos del asistente NVIDIA
 
 
 class Settings(BaseSettings):
@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     ollama_model: str = "gemma4:e2b"
     telegram_token: SecretStr = SecretStr("")  # el token de @BotFather
     telegram_permitidos: str = ""  # números de chat separados por coma; vacío = nadie
+    tavily_api_key: SecretStr = SecretStr("")  # clave para la búsqueda web; vacía = deshabilitada
 
     api_tokens: SecretStr = SecretStr("")  # extra opcional (API.md): tokens de la API separados por coma; vacío = nadie
 

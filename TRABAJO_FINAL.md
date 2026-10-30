@@ -1,20 +1,17 @@
-# Trabajo final
+# Trabajo final: NVIDIA GPU & AI Assistant
 
 **Entrega: jueves 5 de noviembre de 2026.**
 
 ## Qué haces
 
-1. **Haz funcionar el asistente de clase como bot de Telegram en Render**, con esta plantilla. Ya trae lo que vimos: APIs públicas, el contador de gastos en SQLite y la búsqueda en documentos con citas.
-2. **Hazlo tuyo.** Ajusta a tus preferencias:
-   - el tema y las instrucciones (para quién es y qué hace);
-   - tus datos: otro CSV, otros PDFs;
-   - una API nueva, otra tool u otra capability;
-   - lo que vimos en las otras sesiones: búsqueda web (S2), un servidor MCP (S3), un flujo con un grafo (S4).
+1. **Haz funcionar el asistente como bot de Telegram en Render**, usando la plantilla del curso.
+2. **Especialízalo en GPU NVIDIA e IA.** El proyecto usa cinco whitepapers sobre Pascal, Turing, Ampere, Ada Lovelace y Blackwell como base documental.
+3. **Amplíalo progresivamente** con diagnóstico de hardware, una API pública relacionada con IA, búsqueda web, un servidor MCP y un flujo con Pydantic Graph, explicando los supuestos y límites de sus respuestas.
 
 ## Qué entregas (por el canal que indique el docente)
 
 - [ ] El **usuario de tu bot** (`@…_bot`). Antes, pídele al docente su número de chat y agrégalo a `TELEGRAM_PERMITIDOS` en Render.
-- [ ] El **enlace a tu repositorio**. Puede ser privado si compartes el acceso con el docente. En su README escribe tres o cuatro líneas: qué cambiaste o agregaste y dos o tres preguntas para probarlo.
+- [ ] El **enlace a tu repositorio**. Puede ser privado si compartes el acceso con el docente. En su README describe el asistente y agrega preguntas para probarlo, por ejemplo una comparación entre arquitecturas y una consulta sobre capacidades de GPU.
 
 ## Cómo se califica
 

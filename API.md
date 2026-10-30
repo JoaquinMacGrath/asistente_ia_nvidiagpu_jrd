@@ -5,8 +5,8 @@
 La API es el archivo `api.py`. Recibe un mensaje por HTTP y devuelve la respuesta del **mismo** `responder(mensaje)` que usa el bot. Si cambias una tool en `capacidades.py`, la toman los dos.
 
 ```
-POST /chat   Authorization: Bearer <tu token>   {"mensaje": "¿Cuánto gasté en transporte?"}
-         →   {"texto": "En transporte gastaste 67 bolivianos en total."}
+POST /chat   Authorization: Bearer <tu token>   {"mensaje": "¿Qué diferencias hay entre Ampere y Ada Lovelace?"}
+         →   {"texto": "…respuesta del asistente con citas a los documentos…"}
 ```
 
 ## 1 · Crea tu token
@@ -37,7 +37,7 @@ uv run uvicorn api:app --reload
   curl -X POST http://127.0.0.1:8000/chat \
     -H "Authorization: Bearer el-token-que-salió" \
     -H "Content-Type: application/json" \
-    -d '{"mensaje": "¿Cuánto gasté en transporte?"}'
+  -d '{"mensaje": "¿Qué diferencias hay entre Ampere y Ada Lovelace?"}'
   ```
 
 | Respuesta | Qué significa |

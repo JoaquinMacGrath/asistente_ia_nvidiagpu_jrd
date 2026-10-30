@@ -54,6 +54,10 @@ En la plantilla (`capacidades.py`):
 - `buscar()` devuelve los trozos con su fuente.
 - `buscar_documentos` es la tool.
 
+En este proyecto NVIDIA, cada fragmento conserva metadatos de generación, arquitectura documentada, tema/sección, autor y nombre del PDF. El ID lleva archivo, página y número de fragmento (por ejemplo, `nvidia-ada-gpu-architecture-p12-c2`) para que la respuesta pueda citar una ubicación concreta. Las preguntas comparativas consultan por separado cada generación solicitada y reúnen resultados de todas ellas. Los whitepapers con índice PDF asignan el tema desde sus marcadores; los que no tienen marcadores se etiquetan como `general`.
+
+El indexador del proyecto usa fragmentos de 900 caracteres con 150 de solapamiento y envía los embeddings en lotes de 64. Chroma sigue usando una sola colección temporal en memoria, que se reconstruye al iniciar cada proceso.
+
 **Para personalizar:** cambia los PDFs de `datos/documentos/` por los de tu tema (ficticios). Si quieres usar Markdown o texto, léelos con `archivo.read_text(encoding="utf-8")` en lugar de `PdfReader`. Ajusta `description` e `instructions` de la capability `documentos`.
 
 - El modelo de embeddings por defecto de Chroma (all-MiniLM) está entrenado en inglés y encuentra mal en español: usa `gemini-embedding-001`.

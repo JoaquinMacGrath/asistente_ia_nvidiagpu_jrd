@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.14"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -1183,8 +1183,9 @@ dependencies = [
     { name = "chromadb" },
     { name = "fastapi" },
     { name = "httpx" },
+    { name = "huggingface-hub" },
     { name = "langchain-text-splitters" },
-    { name = "pydantic-ai-slim", extra = ["google", "openai"] },
+    { name = "pydantic-ai-slim", extra = ["google", "openai", "tavily"] },
     { name = "pydantic-settings" },
     { name = "pypdf" },
     { name = "python-telegram-bot", extra = ["webhooks"] },
@@ -1202,8 +1203,9 @@ requires-dist = [
     { name = "chromadb", specifier = ">=1.5.9,<2" },
     { name = "fastapi", specifier = ">=0.162,<1" },
     { name = "httpx", specifier = ">=0.28,<1" },
+    { name = "huggingface-hub", specifier = ">=2.4,<3" },
     { name = "langchain-text-splitters", specifier = ">=1.1,<2" },
-    { name = "pydantic-ai-slim", extras = ["google", "openai"], specifier = "==2.59.0" },
+    { name = "pydantic-ai-slim", extras = ["google", "openai", "tavily"], specifier = "==2.59.0" },
     { name = "pydantic-settings", specifier = ">=2.16,<3" },
     { name = "pypdf", specifier = ">=6,<7" },
     { name = "python-telegram-bot", extras = ["webhooks"], specifier = ">=22,<23" },
@@ -1907,6 +1909,9 @@ openai = [
     { name = "openai" },
     { name = "tiktoken" },
 ]
+tavily = [
+    { name = "tavily-python" },
+]
 
 [[package]]
 name = "pydantic-core"
@@ -2381,6 +2386,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/48/bb/3d8757f21e9a53d9035c9eb039a777047139a16bfdbedfc7a58241c3d914/starlette-1.10.0.tar.gz", hash = "sha256:b8399098d4c1e3522734f7235dc79b1fc967f96cf139c81e0fa30479e0685f9b", size = 2734356, upload-time = "2026-10-24T15:04:12.342Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/88/2e/947cfe02def9371c07cd5bf5b6b61c829e9aecb9904db02a66cfafbc1eec/starlette-1.10.0-py3-none-any.whl", hash = "sha256:478c0ab3b4ced6e82719849c118fa406f0278a3499c1a898cd15cd31bdc38ce4", size = 80571, upload-time = "2026-10-24T15:04:10.371Z" },
+]
+
+[[package]]
+name = "tavily-python"
+version = "0.8.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "requests" },
+    { name = "tiktoken" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2f/39/3aff85cb3b45cab3ef9578560364b893baa34e79744e99567a825dbadf57/tavily_python-0.8.5.tar.gz", hash = "sha256:1795965c3ffe5654856244d637daa816a4ee947aca57d0588b731c69e75e71fe", size = 35634, upload-time = "2026-10-06T15:11:34.827Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2f/c5/fc13567e2a1d3671f51252d44f580bf3ab3c0a6ec90a6553f5c67ba87208/tavily_python-0.8.5-py3-none-any.whl", hash = "sha256:f8d2880f5aa67cf3ee2eb1f7c9336ea50dc331eb1e406688391badb0140599a7", size = 24629, upload-time = "2026-10-06T15:11:33.854Z" },
 ]
 
 [[package]]
