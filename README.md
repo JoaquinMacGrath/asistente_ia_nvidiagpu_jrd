@@ -37,7 +37,7 @@ API_TOKENS=
 
 `GEMINI_API_KEY_LOCAL` es necesaria si `MODO=gemini`; en `MODO=local` se usa Ollama en `http://localhost:11434/v1`. Hugging Face consulta recursos públicos sin token. Tavily requiere `TAVILY_API_KEY` para búsquedas web. `API_TOKENS` es opcional y solo se necesita para habilitar clientes de la API.
 
-Para Telegram, `TELEGRAM_PERMITIDOS` debe contener el ID del chat privado del docente (IDs separados por coma si hay más usuarios). No hace falta habilitar grupos. El bot rechaza chats no autorizados antes de llamar al agente.
+Para Telegram, `TELEGRAM_PERMITIDOS` debe contener el ID del chat privado autorizado (IDs separados por coma si hay más usuarios). No hace falta habilitar grupos. El bot rechaza chats no autorizados antes de llamar al agente.
 
 Instalación y ejecución:
 
@@ -80,4 +80,4 @@ El almacenamiento de Render es efímero: el historial de Telegram y el índice R
 - [datos/documentos/](datos/documentos/): cinco PDF y referencias web manuales.
 - [tests/](tests/): pruebas locales automatizadas.
 
-La guía del curso está en `.agents/skills/asistente-pydantic-ai/` y la descripción de la entrega en [TRABAJO_FINAL.md](TRABAJO_FINAL.md).
+Más detalles del proyecto: [descripción de VRAMind](TRABAJO_FINAL.md) y [documentación de la API](API.md).

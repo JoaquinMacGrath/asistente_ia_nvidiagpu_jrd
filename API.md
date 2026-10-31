@@ -1,6 +1,6 @@
-# Extra opcional: tu asistente como API
+# API HTTP opcional de VRAMind
 
-**No hace falta para el trabajo final.** Lo principal es el bot de Telegram del [README](README.md). Haz esto solo si quieres que, además, otros programas usen tu asistente: un script, otra app, n8n o una página con su propio servidor.
+Además del bot de Telegram descrito en el [README](README.md), VRAMind puede atender solicitudes HTTP para que otros programas consulten el mismo agente.
 
 La API es el archivo `api.py`. Recibe un mensaje por HTTP y devuelve la respuesta del **mismo** `responder(mensaje)` que usa el bot. Si cambias una tool en `capacidades.py`, la toman los dos.
 
@@ -11,7 +11,7 @@ POST /chat   Authorization: Bearer <tu token>   {"mensaje": "¿Qué diferencias 
 
 ## 1 · Crea tu token
 
-Igual que el bot solo responde a los números de `TELEGRAM_PERMITIDOS`, la API solo responde a quien mande un token de `API_TOKENS`. Sin token, contesta `401` **sin llamar al modelo**, así que nadie gasta tu cuota. Si la lista está vacía, no entra nadie.
+La API solo responde a quien mande un token configurado en `API_TOKENS`. Sin token válido, contesta `401` **sin llamar al modelo**. Si la lista está vacía, no entra nadie.
 
 1. Genera un token:
    ```bash
