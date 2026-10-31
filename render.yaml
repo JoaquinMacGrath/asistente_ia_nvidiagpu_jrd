@@ -2,7 +2,7 @@
 # Si prefieres hacerlo a mano (New → Web Service), sigue el README, sección 4: es lo mismo.
 services:
   - type: web
-    name: mi-asistente
+    name: vramind
     runtime: python
     plan: free
     buildCommand: uv sync --locked --no-dev

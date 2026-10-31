@@ -1,39 +1,45 @@
-# NVIDIA GPU & AI Assistant
+# VRAMind
 
-Asistente educativo especializado en arquitecturas y tecnologías NVIDIA para inteligencia artificial. El proyecto reutiliza la plantilla del curso «Más allá de los chatbots», con Pydantic AI, Gemini, ChromaDB, Telegram y Render.
+VRAMind es un asistente educativo para consultar arquitecturas y tecnologías NVIDIA y estimar qué modelos generativos de texto podrían probarse localmente en un equipo. Está construido con Python, PydanticAI, Pydantic Graph, ChromaDB, Hugging Face Hub, Tavily, Telegram y FastAPI.
 
-## Estado actual
+## Capacidades
 
-- Un agente principal responde en español mediante `responder(mensaje)`.
-- El RAG indexa los PDF de `datos/documentos/` al realizar la primera consulta y devuelve fragmentos con identificadores de fuente.
-- Telegram ofrece polling local y webhook en Render. Solo responde a los chats incluidos en `TELEGRAM_PERMITIDOS`.
-- En chats privados, Telegram conserva el historial de la conversación en memoria durante la ejecución; `/start` lo reinicia y un reinicio del proceso lo pierde. En grupos, cada mensaje se procesa sin historial compartido.
-- La API HTTP de `api.py` es opcional y usa el mismo agente; requiere `API_TOKENS`.
+- **Documentación NVIDIA (RAG):** cinco whitepapers PDF sobre Pascal, Turing, Ampere, Ada Lovelace y Blackwell, con generación, chip, tema, fuente, documento y página en los metadatos. `datos/documentos/fuentes_web.md` es una lista manual de referencias y no se indexa en el RAG.
+- **Diagnóstico local:** diez modelos de texto de Qwen, Llama, Gemma, Phi y DeepSeek; estima automáticamente Q4, Q5 y Q8 y separa pesos, caché KV y runtime.
+- **Hugging Face Hub:** búsqueda pública y consulta de metadatos/configuración de modelos. No modifica el catálogo local ni descarga pesos.
+- **Tavily:** búsqueda web actualizada con títulos, fragmentos y enlaces de hasta cinco resultados.
+- **Pydantic Graph:** clasifica la consulta con reglas locales, dirige el turno a una ruta y construye la respuesta usando el agente PydanticAI existente. Las rutas son NVIDIA, hardware, Hugging Face, web, combinada y general.
+- **Telegram:** polling local o webhook en Render. En chats privados conserva el historial en memoria hasta reiniciar el proceso; `/start` lo reinicia.
+- **API opcional:** FastAPI, protegida con `API_TOKENS`; ver [API.md](API.md).
 
-El asistente se centra en Pascal, Turing, Ampere, Ada Lovelace y Blackwell. Las instrucciones le piden distinguir las capacidades de una arquitectura de las de un modelo concreto de GPU y citar los fragmentos recuperados.
+El agente responde en español. No hay integración MCP.
 
-La colección RAG guarda metadatos de generación, arquitectura documentada, tema, fuente y PDF. En comparaciones, la búsqueda recupera resultados por separado para cada generación solicitada. La colección es temporal y se reconstruye cuando inicia el proceso.
+## Diagnóstico: alcance y límites
 
-El diagnóstico local de modelos de texto usa un catálogo ampliable de cinco tamaños Qwen3. Separa memoria estimada de pesos, caché KV y runtime; reserva parte de la VRAM y RAM para el entorno, y señala cuándo podría hacer falta offloading. Sus factores de cuantización y runtime son supuestos, no tamaños exactos de archivos. La búsqueda web general, otras APIs, MCP y Pydantic Graph están previstos para etapas posteriores.
+Indica GPU, VRAM, CPU y RAM; el contexto predeterminado es 4096 tokens. Se aplican reservas de VRAM y RAM. Se muestran modelos que caben en VRAM estimada, opciones con posible offloading y modelos que superan la memoria estimada. Se excluyen y explican por separado modelos cuyo límite de contexto sea inferior al solicitado.
 
-La capability de Hugging Face Hub busca hasta cinco modelos públicos y consulta metadatos, configuración y un fragmento limitado de su tarjeta. No descarga pesos ni modifica el catálogo Qwen3; el contenido de las tarjetas se trata como fuente externa no confiable.
+Q4, Q5 y Q8 son supuestos aproximados de bytes por parámetro, no tamaños de archivos reales. El offloading es una posibilidad teórica basada en memoria: depende del runtime, puede reducir mucho la velocidad y no garantiza que el modelo pueda ejecutarse. Las estimaciones no verifican drivers, compatibilidad o rendimiento real.
 
-## Requisitos y configuración
+## Requisitos y configuración local
 
-Se necesita `uv`, una clave de Gemini y, para usar Telegram, un bot creado con [@BotFather](https://telegram.org/). Copia `.env.example` como `.env` y completa las variables necesarias:
+Se necesita Python 3.14 y [`uv`](https://docs.astral.sh/uv/). Copia `.env.example` como `.env` y completa solo lo necesario. Nunca subas `.env` ni pegues claves en el código.
 
 ```dotenv
 MODO=gemini
-GEMINI_API_KEY_LOCAL=
+GEMINI_API_KEY_LOCAL=tu_clave
 GEMINI_MODEL=gemini-3.5-flash-lite
-TELEGRAM_TOKEN=
-TELEGRAM_PERMITIDOS=
+OLLAMA_MODEL=gemma4:e2b
+TELEGRAM_TOKEN=token_de_botfather
+TELEGRAM_PERMITIDOS=id_de_chat_privado
+TAVILY_API_KEY=tu_clave_tavily
 API_TOKENS=
 ```
 
-No subas `.env` ni incluyas claves en el código. En Render, configura las variables en **Environment**.
+`GEMINI_API_KEY_LOCAL` es necesaria si `MODO=gemini`; en `MODO=local` se usa Ollama en `http://localhost:11434/v1`. Hugging Face consulta recursos públicos sin token. Tavily requiere `TAVILY_API_KEY` para búsquedas web. `API_TOKENS` es opcional y solo se necesita para habilitar clientes de la API.
 
-## Ejecutar localmente
+Para Telegram, `TELEGRAM_PERMITIDOS` debe contener el ID del chat privado del docente (IDs separados por coma si hay más usuarios). No hace falta habilitar grupos. El bot rechaza chats no autorizados antes de llamar al agente.
+
+Instalación y ejecución:
 
 ```bash
 uv sync
@@ -41,28 +47,37 @@ uv run asistente.py
 uv run bot.py
 ```
 
-Para probar la API opcional:
+La API opcional se inicia con:
 
 ```bash
 uv run uvicorn api:app --reload
 ```
 
-El endpoint `POST /chat` requiere `Authorization: Bearer <token>` y acepta un JSON con `mensaje`.
+Las pruebas automatizadas usan modelos, herramientas y respuestas simulados; no requieren consumir cuotas de Gemini, Tavily o Hugging Face:
 
-## Despliegue en Render
+```bash
+uv run pytest
+```
 
-El archivo `render.yaml` configura un servicio web con `uv sync --locked --no-dev` y `uv run --no-sync bot.py`. Añade `GEMINI_API_KEY_LOCAL`, `TELEGRAM_TOKEN` y `TELEGRAM_PERMITIDOS` en las variables de entorno del servicio.
+## RAG y cuotas de embeddings
 
-Render activa el webhook automáticamente mediante `RENDER_EXTERNAL_URL`. En local, el bot usa polling. No ejecutes simultáneamente dos instancias en polling con el mismo token.
+El índice utiliza una colección ChromaDB efímera y se reconstruye al iniciar cada proceso cuando se realiza la primera búsqueda RAG. La creación del índice extrae los PDF y solicita embeddings a Gemini en lotes, por lo que esa primera consulta puede consumir cuota de embeddings. Las búsquedas posteriores reutilizan el índice mientras ese proceso siga activo.
+
+## Render
+
+`render.yaml` despliega el bot como servicio web, instala con `uv sync --locked --no-dev` y ejecuta `uv run --no-sync bot.py`. Configura en Render **Environment** las variables `GEMINI_API_KEY_LOCAL`, `TELEGRAM_TOKEN`, `TELEGRAM_PERMITIDOS` y `TAVILY_API_KEY`. No guardes valores reales en `render.yaml`. Render define `RENDER_EXTERNAL_URL` y `PORT` para activar el webhook. Para Ollama usa el modo local solo en un equipo donde ese servicio esté disponible; no está desplegado en Render.
+
+El almacenamiento de Render es efímero: el historial de Telegram y el índice RAG en memoria no sobreviven a un reinicio. No ejecutes polling local al mismo tiempo que el webhook con el mismo token.
 
 ## Archivos principales
 
-- `asistente.py`: instrucciones del agente y función `responder`.
-- `capacidades.py`: RAG NVIDIA, estimador de memoria y consulta de modelos en Hugging Face Hub.
-- `config.py`: configuración del modelo y secretos.
-- `bot.py`: bot de Telegram y control de acceso.
-- `api.py`: API HTTP opcional.
-- `datos/documentos/`: cinco whitepapers de arquitecturas NVIDIA y `fuentes_web.md`.
-- `tests/`: pruebas de acceso a Telegram y autenticación de la API con modelos falsos.
+- [asistente.py](asistente.py): agente único y puntos de entrada `responder()` y `responder_con_conversacion()`.
+- [grafo.py](grafo.py): clasificación local y flujo condicional Pydantic Graph.
+- [capacidades.py](capacidades.py): RAG, diagnóstico, Hugging Face y Tavily.
+- [config.py](config.py): ajustes y secretos con `SecretStr`.
+- [bot.py](bot.py): Telegram y control de acceso.
+- [api.py](api.py): API opcional.
+- [datos/documentos/](datos/documentos/): cinco PDF y referencias web manuales.
+- [tests/](tests/): pruebas locales automatizadas.
 
-La guía del curso está en `.agents/skills/asistente-pydantic-ai/` y los requisitos de entrega en `TRABAJO_FINAL.md`.
+La guía del curso está en `.agents/skills/asistente-pydantic-ai/` y la descripción de la entrega en [TRABAJO_FINAL.md](TRABAJO_FINAL.md).

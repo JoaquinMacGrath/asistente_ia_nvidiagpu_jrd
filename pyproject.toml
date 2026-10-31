@@ -1,7 +1,7 @@
 [project]
-name = "mi-asistente"
+name = "vramind"
 version = "0.1.0"
-description = "Plantilla de asistente con Pydantic AI, desplegado como bot de Telegram en Render"
+description = "Asistente de arquitecturas NVIDIA y diagnóstico local de modelos de IA"
 readme = "README.md"
 requires-python = ">=3.14"
 authors = [{ name = "Alex Ojeda Copa" }]
@@ -17,6 +17,7 @@ dependencies = [
     "fastapi>=0.162,<1",
     "uvicorn>=0.54,<1",
     "huggingface-hub>=2.4,<3",
+    "pydantic-graph==2.59.0",
 ]
 
 [dependency-groups]

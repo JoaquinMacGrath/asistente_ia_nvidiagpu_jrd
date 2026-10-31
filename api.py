@@ -5,6 +5,7 @@ En Render, es un segundo servicio del mismo repo, con otro Start Command.
 """
 
 import secrets
+import logging
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -13,7 +14,8 @@ from pydantic import BaseModel, Field
 from asistente import responder
 from config import settings
 
-app = FastAPI(title="NVIDIA GPU & AI Assistant")
+app = FastAPI(title="VRAMind")
+logger = logging.getLogger(__name__)
 
 
 def autenticar(credenciales: HTTPAuthorizationCredentials | None = Depends(HTTPBearer(auto_error=False))) -> None:
@@ -36,4 +38,12 @@ class Respuesta(BaseModel):
 
 @app.post("/chat", dependencies=[Depends(autenticar)])
 async def chat(pedido: Pedido) -> Respuesta:
-    return Respuesta(texto=await responder(pedido.mensaje))  # el mismo responder que usa el bot
+    try:
+        return Respuesta(texto=await responder(pedido.mensaje))  # el mismo responder que usa el bot
+    except Exception as error:
+        incidente = secrets.token_hex(4)
+        logger.error("Fallo del agente en API; incidente=%s tipo=%s", incidente, type(error).__name__)
+        raise HTTPException(
+            status_code=500,
+            detail="No se pudo procesar la solicitud. Inténtalo de nuevo más tarde.",
+        ) from None

@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Literal
 
 import pydantic_ai
-from pydantic import SecretStr
+from pydantic import SecretStr, model_validator
 from pydantic_ai.models import Model
 from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.models.openai import OpenAIChatModel
@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=RAIZ / ".env", extra="ignore")
 
     modo: Literal["gemini", "local"] = "gemini"  # gemini = la nube · local = Ollama (no funciona en Render)
-    gemini_api_key_local: SecretStr  # obligatoria; SecretStr no se imprime por accidente
+    gemini_api_key_local: SecretStr = SecretStr("")  # SecretStr no se imprime por accidente
     gemini_model: str = "gemini-3.5-flash-lite"
     ollama_model: str = "gemma4:e2b"
     telegram_token: SecretStr = SecretStr("")  # el token de @BotFather
@@ -38,6 +38,12 @@ class Settings(BaseSettings):
     tavily_api_key: SecretStr = SecretStr("")  # clave para la búsqueda web; vacía = deshabilitada
 
     api_tokens: SecretStr = SecretStr("")  # extra opcional (API.md): tokens de la API separados por coma; vacío = nadie
+
+    @model_validator(mode="after")
+    def validar_clave_gemini(self) -> "Settings":
+        if self.modo == "gemini" and not self.gemini_api_key_local.get_secret_value().strip():
+            raise ValueError("GEMINI_API_KEY_LOCAL es obligatoria cuando MODO=gemini.")
+        return self
 
     @property
     def permitidos(self) -> set[str]:

@@ -45,7 +45,7 @@ uv run uvicorn api:app --reload
 | `200` y `{"texto": …}` | Funciona |
 | `401 Token inválido` | Falta el token, está mal o `API_TOKENS` está vacío |
 | `422` | El pedido no cumple el contrato: falta `mensaje`, está vacío o pasa de 2000 caracteres |
-| `500` | Falló el modelo o una tool: el error está en la terminal (un `429` es cuota) |
+| `500` | Falló el agente o una tool. El cliente recibe un mensaje genérico; el registro del servidor contiene solo el tipo de excepción y un identificador de incidente, no el texto interno del error. Un límite del proveedor puede aparecer como respuesta de la tool dentro de `200`. |
 
 ## 3 · Publícala en Render
 
@@ -56,7 +56,7 @@ Es un **segundo servicio** del mismo repositorio. El servicio del bot no se toca
 
 | Campo | Valor |
 |---|---|
-| **Name** | `mi-asistente-ana-api`. Será parte de la URL |
+| **Name** | `vramind-api` (o un nombre disponible). Será parte de la URL |
 | **Build Command** | `uv sync --locked --no-dev`, el mismo |
 | **Start Command** | `uv run --no-sync uvicorn api:app --host 0.0.0.0 --port $PORT` |
 | **Instance Type** | **Free** |
@@ -68,7 +68,7 @@ Es un **segundo servicio** del mismo repositorio. El servicio del bot no se toca
 | `GEMINI_API_KEY_LOCAL` | Tu clave de Gemini |
 | `API_TOKENS` | Tu token o tus tokens |
 
-4. Pulsa **Deploy Web Service** y pruébala como en el paso 2, con `https://mi-asistente-ana-api.onrender.com` en lugar de `http://127.0.0.1:8000`.
+4. Pulsa **Deploy Web Service** y pruébala como en el paso 2, usando la URL que Render asigne en lugar de `http://127.0.0.1:8000`.
 
 Cada `git push` vuelve a desplegar los dos servicios. Los límites del plan Free son los mismos que los del bot: se duerme a los 15 minutos, el disco es efímero y las 750 horas gratis al mes se reparten entre tus servicios (alcanzan, porque se duermen).
 
@@ -76,4 +76,5 @@ Cada `git push` vuelve a desplegar los dos servicios. Los límites del plan Free
 
 - El token sirve cuando la API la llama **un programa**. Si haces una página web que llama a la API **desde el navegador**, cualquiera puede ver el token en las herramientas de desarrollo. Para eso hace falta un login o un servidor intermedio.
 - Nunca escribas un token en el código ni lo subas a GitHub: va en `.env` y en *Environment*.
-- `uv run pytest` incluye dos pruebas de la API: sin token válido no se llama al modelo, y con token responde.
+- Las respuestas HTTP ante errores del agente son genéricas. El registro guarda el tipo de excepción y un identificador aleatorio de incidente, sin incluir el contenido de la excepción.
+- `uv run pytest` ejecuta la suite automatizada; las pruebas de autenticación verifican que un token inválido no llama al agente y que uno válido permite procesar la solicitud con un modelo simulado.
