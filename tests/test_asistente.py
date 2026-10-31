@@ -395,6 +395,29 @@ async def test_que_herramientas_tienes_responde_breve_y_sin_tools():
     assert "Búsqueda web" in resultado.output
 
 
+async def test_pregunta_por_vramind_se_entiende_como_pregunta_sobre_el_asistente():
+    assert "VRAMind es tu nombre" in asistente.REGLAS_CAPACIDADES
+    assert grafo.clasificar_consulta("¿Qué es VRAMind y en qué puede ayudarme?") == "general"
+    respuesta_esperada = (
+        "VRAMind es un asistente sobre GPU NVIDIA e IA. Puede consultar documentación NVIDIA, "
+        "estimar modelos para tu hardware, buscar modelos en Hugging Face e investigar novedades web."
+    )
+    llamadas_modelo = []
+
+    def modelo(mensajes, info):
+        llamadas_modelo.append(mensajes)
+        return ModelResponse(parts=[TextPart(respuesta_esperada)])
+
+    with asistente.asistente.override(model=FunctionModel(modelo)):
+        respuesta = await asistente.responder("¿Qué es VRAMind y en qué puede ayudarme?")
+
+    assert respuesta == respuesta_esperada
+    assert len(llamadas_modelo) == 1
+    assert all(area in respuesta for area in (
+        "documentación NVIDIA", "hardware", "Hugging Face", "novedades web"
+    ))
+
+
 async def test_comparacion_de_arquitecturas_invoca_rag(monkeypatch):
     resultados = []
 
